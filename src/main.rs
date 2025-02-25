@@ -1,86 +1,10 @@
+mod display_options;
+mod file_result;
+
+use display_options::DisplayOptions;
+use file_result::{file_result_string, FileResult};
+
 use std::{env, io::Read};
-
-#[derive(Debug, PartialEq)]
-struct DisplayOptions {
-    bytes: bool,
-    chars: bool,
-    lines: bool,
-    words: bool,
-}
-impl DisplayOptions {
-    pub fn new(bytes: bool, chars: bool, lines: bool, words: bool) -> Self {
-        Self {
-            bytes,
-            chars,
-            lines,
-            words,
-        }
-    }
-}
-
-// TODO: fix the different order, it has to do with printing like wc
-impl From<&DisplayOptions> for [bool; 4] {
-    fn from(value: &DisplayOptions) -> Self {
-        [value.lines, value.words, value.bytes, value.chars]
-    }
-}
-
-pub fn num_to_display(options: &DisplayOptions) -> u8 {
-    Into::<[bool; 4]>::into(options)
-        .into_iter()
-        .fold(0u8, |acc, b| if b { acc + 1 } else { acc })
-}
-
-impl Default for DisplayOptions {
-    fn default() -> Self {
-        Self::new(true, false, true, true)
-    }
-}
-
-#[derive(Debug, Eq, PartialEq)]
-struct FileResult {
-    bytes: usize,
-    chars: usize,
-    lines: usize,
-    words: usize,
-}
-
-impl FileResult {
-    pub fn new(bytes: usize, chars: usize, lines: usize, words: usize) -> Self {
-        Self {
-            bytes,
-            chars,
-            lines,
-            words,
-        }
-    }
-}
-
-impl Default for FileResult {
-    fn default() -> Self {
-        Self::new(0, 0, 0, 0)
-    }
-}
-
-impl From<&FileResult> for [usize; 4] {
-    fn from(value: &FileResult) -> Self {
-        [value.lines, value.words, value.bytes, value.chars]
-    }
-}
-
-pub fn file_result_string(result: &FileResult, options: &DisplayOptions) -> String {
-    let options_arr: [bool; 4] = options.into();
-    let result_arr: [usize; 4] = result.into();
-
-    // TODO: I don't like this
-    let mut s = String::new();
-    options_arr.into_iter().enumerate().for_each(|(i, v)| {
-        if v {
-            s.push_str(&format!("{:<10}", &result_arr[i]));
-        }
-    });
-    s
-}
 
 pub fn counts_for_line(line: &str) -> FileResult {
     let mut words = 0;
