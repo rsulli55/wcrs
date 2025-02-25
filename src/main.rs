@@ -2,47 +2,9 @@ mod display_options;
 mod file_result;
 
 use display_options::DisplayOptions;
-use file_result::{file_result_string, FileResult};
+use file_result::{counts_for_line, file_result_string, FileResult};
 
 use std::{env, io::Read};
-
-pub fn counts_for_line(line: &str) -> FileResult {
-    let mut words = 0;
-    let mut chars = 0;
-    let mut bytes = 0;
-
-    // skip the first set of whitespace characters
-    let start_of_word = match line.find(|c: char| !c.is_whitespace()) {
-        Some(i) => i,
-        None => {
-            let chars = line.chars().count();
-            let bytes = line.len();
-            return FileResult::new(bytes, chars, 1, 0);
-        }
-    };
-    let (whitespace_prefix, rest) = line.split_at(start_of_word);
-    let (wchars, wbytes) = whitespace_prefix
-        .chars()
-        .fold((0, 0), |acc, c: char| (acc.0 + 1, acc.1 + c.len_utf8()));
-
-    let (chars, bytes, words, _) = rest.chars().fold((0, 0, 0, true), |acc, c| {
-        let chars = acc.0 + 1;
-        let bytes = acc.1 + c.len_utf8();
-        let mut prev_whitespace = acc.3;
-        let curr_whitespace = c.is_whitespace();
-        let incr_words = !curr_whitespace && prev_whitespace;
-        let words = if incr_words { acc.2 + 1 } else { acc.2 };
-        prev_whitespace = if prev_whitespace != curr_whitespace {
-            curr_whitespace
-        } else {
-            prev_whitespace
-        };
-
-        (chars, bytes, words, prev_whitespace)
-    });
-
-    FileResult::new(wbytes + bytes, wchars + chars, 1, words)
-}
 
 const USAGE: &'static str = "wc [OPTION...] [FILE]...";
 
