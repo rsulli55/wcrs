@@ -1,3 +1,4 @@
+use proptest::prop_compose;
 use proptest::proptest;
 use proptest::{
     char::{CharStrategy, DEFAULT_PREFERRED_RANGES, DEFAULT_SPECIAL_CHARS},
@@ -87,28 +88,86 @@ pub fn counts_for_line(line: &str) -> FileResult {
     FileResult::new(wbytes + bytes, wchars + chars, 1, words)
 }
 
-type Word = String;
+#[derive(Debug, Clone)]
+struct WordData {
+    word: String,
+    chars: usize,
+    bytes: usize,
+}
 
-fn word_size_strategy() -> impl strategy::Strategy<Value = (Word, usize)> {
+#[derive(Debug, Clone)]
+struct LineData {
+    line: String,
+    words: usize,
+    chars: usize,
+    bytes: usize,
+}
+
+fn word_data_strategy() -> impl strategy::Strategy<Value = WordData> {
+    prop::collection::vec(proptest::char::any(), 1..20)
+        // TODO: v.len() is giving the character count and String.len() gives the byte count
+        .prop_flat_map(|v| {
+            let chars = v.len();
+            let word: String = v.into_iter().collect();
+            let bytes = word.len();
+            strategy::Just(WordData { word, chars, bytes })
+        })
+}
+
+// make a custom CharStrategy which only selects whitespace
+// Rust recognized whitespace: https://doc.rust-lang.org/reference/whitespace.html
+fn whitespace_strategy() -> impl strategy::Strategy<Value = String> {
+    let ranges = &['\t'..='\t', ' '..=' '];
     prop::collection::vec(
-        CharStrategy::new_borrowed(
-            &DEFAULT_SPECIAL_CHARS,
-            &DEFAULT_PREFERRED_RANGES,
-            &DEFAULT_PREFERRED_RANGES,
-        ),
+        CharStrategy::new_borrowed(&['\t', ' '], ranges, ranges),
         1..20,
     )
-    // TODO: v.len() is giving the character count and String.len() gives the byte count
     .prop_flat_map(|v| {
-        let len = v.len();
-        (strategy::Just(v.into_iter().collect()), strategy::Just(len))
+        let spaces: String = v.iter().collect();
+        strategy::Just(spaces)
     })
+}
+
+prop_compose! {
+ fn line_data_strategy()
+     (num_words in 1..20usize)
+     (whitespaces in prop::collection::vec(
+         whitespace_strategy(),
+             // TODO: changes from num_words -1 because zip does will end once one iterator is exhausted
+             num_words
+     ),
+     words in prop::collection::vec( word_data_strategy(), num_words),
+     num_words in strategy::Just(num_words)) -> LineData {
+     let chars = whitespaces.len() + words.len();
+     let line: String = words.iter().zip(whitespaces.iter()).flat_map(|(w, s)| {
+         w.word.chars().chain(s.chars())
+     }).collect();
+     let bytes = line.len();
+     let words = num_words;
+
+     LineData {line, words, chars, bytes }
+
+ }
 }
 
 proptest! {
     #[test]
-    fn test_word_strategy((w, l) in word_size_strategy()) {
-        dbg!("Word: {w}");
-        assert_eq!(w.len(), l);
+    fn test_word_strategy(wd in word_data_strategy()) {
+        let word = &wd.word;
+        let chars = &wd.chars;
+        let bytes = &wd.bytes;
+        dbg!("Word: {word}");
+        assert_eq!(word.len(), *bytes);
     }
+
+        #[test]
+    fn test_line_strategy(ld in line_data_strategy()) {
+        let line = &ld.line;
+        let words= &ld.words;
+        let chars = &ld.chars;
+        let bytes = &ld.bytes;
+        dbg!("Line: {line}");
+        assert_eq!(line.len(), *bytes);
+    }
+
 }
