@@ -1,10 +1,6 @@
-mod display_options;
-mod file_result;
-
-use display_options::DisplayOptions;
-use file_result::{counts_for_line, file_result_string, FileResult};
-
 use std::{env, io::Read};
+use wcrs::display_options::DisplayOptions;
+use wcrs::file_result::{counts_for_file, file_result_string};
 
 const USAGE: &'static str = "wc [OPTION...] [FILE]...";
 
@@ -39,35 +35,12 @@ fn main() {
         }
     };
 
-    // TODO: Should we handle \r\n newlines as well?
-    let result = contents
-        .split_inclusive(|c| c == '\n')
-        .fold(FileResult::default(), |acc, l| {
-            let line_result = counts_for_line(l);
-            FileResult::new(
-                acc.bytes + line_result.bytes,
-                acc.chars + line_result.chars,
-                acc.lines + line_result.lines,
-                acc.words + line_result.words,
-            )
-        });
-
-    eprintln!("FileResult {:?}", result);
+    let result = counts_for_file(&contents);
 
     println!(
-        "{}",
-        file_result_string(&result, &DisplayOptions::default())
+        "{}  {}",
+        file_result_string(&result, &DisplayOptions::default()),
+        &filename
     );
     println!("Read bytes: {}", num_bytes);
-}
-
-#[test]
-fn test_file_result_string() {
-    let result = FileResult::new(1, 2, 3, 4);
-    let options = DisplayOptions::new(true, false, true, false);
-
-    assert_eq!(
-        &file_result_string(&result, &options),
-        "1         3         "
-    );
 }
