@@ -7,7 +7,7 @@ use crate::display_options::DisplayOptions;
 /// `EXIT_FAILURE`.
 fn invalid_option_exit(arg: &str) {
     eprintln!("{}: unrecognized option {}", PROGRAM, arg);
-    std::process::exit(EXIT_FAILURE);
+    std::process::exit(EXIT_FAILURE as i32);
 }
 
 /// Parse `arg` looking for options  starting with `--`.
@@ -21,7 +21,7 @@ fn parse_long_option(arg: &str) -> DisplayOptions {
     // if help was requested, print it and exit
     if arg == "--help" {
         println!("{}\n{}", USAGE, HELP);
-        std::process::exit(EXIT_SUCCESS);
+        std::process::exit(EXIT_SUCCESS as i32);
     }
     match arg {
         "--lines" => DisplayOptions::with_lines_only(),
@@ -45,7 +45,7 @@ fn parse_short_option(arg: &str) -> DisplayOptions {
     // if help was requested, print it and exit
     if arg == "-help" {
         println!("{}\n{}", USAGE, HELP);
-        std::process::exit(EXIT_SUCCESS);
+        std::process::exit(EXIT_SUCCESS as i32);
     }
     match arg {
         "-l" => DisplayOptions::with_lines_only(),
@@ -63,7 +63,7 @@ fn parse_short_option(arg: &str) -> DisplayOptions {
 /// Parse the command lines arguments and return a tuple consisting
 /// of the display options, the paths to perform counting on, and
 /// whether or not to also read from stdin.
-fn parse_args(args: &[String]) -> (DisplayOptions, Vec<PathBuf>, bool) {
+pub fn parse_args(args: &[String]) -> (DisplayOptions, Vec<PathBuf>, bool) {
     let mut cli_option_seen = false;
     let mut read_stdin = false;
     let mut display_options = DisplayOptions::default();

@@ -1,5 +1,5 @@
-pub const EXIT_SUCCESS: i32 = 0;
-pub const EXIT_FAILURE: i32 = 1;
+pub const EXIT_SUCCESS: u8 = 0;
+pub const EXIT_FAILURE: u8 = 1;
 pub const PROGRAM: &'static str = "wcrs";
 pub const USAGE: &'static str = "wcrs [OPTION]... [FILE]...";
 pub const HELP: &'static str = concat!(
