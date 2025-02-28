@@ -1,6 +1,6 @@
 use proptest::strategy::{Just, Strategy};
 use proptest::{char, collection};
-use proptest::{prop_compose, prop_oneof, proptest};
+use proptest::{prop_oneof, proptest};
 
 use rand::Rng;
 
