@@ -1,8 +1,8 @@
 pub const EXIT_SUCCESS: u8 = 0;
 pub const EXIT_FAILURE: u8 = 1;
-pub const PROGRAM: &'static str = "wcrs";
-pub const USAGE: &'static str = "wcrs [OPTION]... [FILE]...";
-pub const HELP: &'static str = concat!(
+pub const PROGRAM: &str = "wcrs";
+pub const USAGE: &str = "wcrs [OPTION]... [FILE]...";
+pub const HELP: &str = concat!(
     "Print newline, word, and byte counts for each FILE, and a total \n\
     line if more than one FILE is specified. A word is a nonempty \n\
     sequence of non whitespace delimited by whitespace characters \n\

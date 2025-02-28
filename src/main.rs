@@ -1,9 +1,7 @@
-use std::fs::File;
 use std::process::ExitCode;
 use std::{env, io::Read};
 use wcrs::cli_args::parse_args;
 use wcrs::constants::{EXIT_FAILURE, EXIT_SUCCESS, PROGRAM, USAGE};
-use wcrs::display_options::DisplayOptions;
 use wcrs::file_result::{counts_for_file, file_result_string, FileResult};
 
 fn main() -> ExitCode {
@@ -20,7 +18,7 @@ fn main() -> ExitCode {
 
     let mut return_exit_failure = false;
     let mut total = FileResult::default();
-    let print_total = paths.len() > 1 || (paths.len() == 0 && read_stdin);
+    let print_total = paths.len() > 1 || (paths.len() == 1 && read_stdin);
     for path in paths {
         let mut file = match std::fs::OpenOptions::new().read(true).open(&path) {
             Ok(f) => f,
@@ -56,11 +54,7 @@ fn main() -> ExitCode {
     }
 
     if print_total {
-        println!(
-            " {}  {}",
-            file_result_string(&total, &display_options),
-            "total"
-        );
+        println!(" {}  total", file_result_string(&total, &display_options),);
     }
 
     if return_exit_failure {

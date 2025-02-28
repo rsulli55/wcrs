@@ -103,7 +103,7 @@ pub fn counts_for_line(s: &str) -> FileResult {
 /// Compute line, word, character, and byte counts for `file`.
 pub fn counts_for_file(file: &str) -> FileResult {
     // TODO: Should we handle \r\n newlines as well?
-    file.split_inclusive(|c| c == '\n')
+    file.split_inclusive('\n')
         .fold(FileResult::default(), |acc, l| {
             let line_result = counts_for_line(l);
             FileResult::new(
