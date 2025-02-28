@@ -1,7 +1,7 @@
 use crate::display_options::DisplayOptions;
 
 /// Stores line, word, character, and byte counts for a file
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct FileResult {
     pub lines: usize,
     pub words: usize,
@@ -17,6 +17,22 @@ impl FileResult {
             chars,
             bytes,
         }
+    }
+
+    /// Add the counts in `self` and `other`, storing
+    /// the results in `self`
+    pub fn add_mut(&mut self, other: &Self) {
+        self.lines += other.lines;
+        self.words += other.words;
+        self.chars += other.chars;
+        self.bytes += other.bytes;
+    }
+
+    /// Add the counts in `self` and `other` returning the result
+    pub fn add(&self, other: &Self) -> Self {
+        let mut res = self.clone();
+        res.add_mut(other);
+        res
     }
 }
 
@@ -111,5 +127,12 @@ mod test {
             &file_result_string(&result, &options),
             "1         3         "
         );
+    }
+
+    #[test]
+    fn test_add() {
+        let fr1 = FileResult::new(1, 2, 3, 4);
+        let fr2 = FileResult::new(3, 2, 5, 9);
+        assert_eq!(fr1.add(&fr2), FileResult::new(4, 4, 8, 13));
     }
 }
