@@ -99,6 +99,8 @@ pub fn parse_args(args: &[String]) -> (DisplayOptions, Vec<PathBuf>, bool) {
         display_options = DisplayOptions::default_options();
     }
 
+    // if we didn't find any file paths, read from stdin
+    read_stdin = read_stdin || paths.is_empty();
     (display_options, paths, read_stdin)
 }
 
@@ -164,6 +166,15 @@ mod test {
                 PathBuf::from("1234")
             ]
         );
+        assert_eq!(res.2, true);
+
+        let res = parse_args(&[
+            String::from("-c"),
+            String::from("--chars"),
+            String::from("-w"),
+        ]);
+        assert_eq!(res.0, DisplayOptions::new(false, true, true, true));
+        assert!(res.1.is_empty());
         assert_eq!(res.2, true);
     }
 }

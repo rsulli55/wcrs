@@ -1,7 +1,7 @@
 use std::process::ExitCode;
 use std::{env, io::Read};
 use wcrs::cli_args::parse_args;
-use wcrs::constants::{EXIT_FAILURE, EXIT_SUCCESS, PROGRAM, USAGE};
+use wcrs::constants::{EXIT_FAILURE, EXIT_SUCCESS, PROGRAM};
 use wcrs::file_result::{counts_for_file, file_result_string, FileResult};
 
 /// Reads `file` to a string return either the string or an `std::io::Error`
@@ -29,13 +29,6 @@ fn process_stdin() -> Result<FileResult, std::io::Error> {
 
 fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
-
-    if args.len() < 2 {
-        // TODO: read from stdin instead
-        eprintln!("Error: expected a filename");
-        eprintln!("Usage: {USAGE}");
-        return ExitCode::from(EXIT_FAILURE);
-    }
 
     let (display_options, paths, read_stdin) = parse_args(&args[1..]);
 
