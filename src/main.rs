@@ -30,6 +30,7 @@ fn process_stdin() -> Result<FileResult, std::io::Error> {
 fn main() -> ExitCode {
     let args: Vec<String> = env::args().collect();
 
+    // TODO: args[1..] is not a good idea
     let (display_options, paths, read_stdin) = parse_args(&args[1..]);
 
     let mut return_exit_failure = false;
